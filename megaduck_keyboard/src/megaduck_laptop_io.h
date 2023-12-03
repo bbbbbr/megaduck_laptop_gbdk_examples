@@ -28,24 +28,26 @@
 
 #define MEGADUCK_RX_MAX_PAYLOAD_LEN  14u // 13 data bytes + 1 checksum byte max reply length?
 
+#define TIMEOUT_2_MSEC                  2u  // Used for hardware init counter sequence
+#define TIMEOUT_100_MSEC              100u
+#define TIMEOUT_200_MSEC              200u
+
 
 extern uint8_t serial_cmd_0x09_reply_data;
 
-extern          uint8_t serial_tx_data;
-extern volatile uint8_t serial_rx_data;
-extern volatile uint8_t serial_status;
-extern          uint8_t serial_rx_buf[MEGADUCK_RX_MAX_PAYLOAD_LEN];
-extern          uint8_t serial_rx_buf_len;
+extern volatile uint8_t megaduck_serial_rx_data;
+extern volatile uint8_t megaduck_serial_status;
+extern          uint8_t megaduck_serial_rx_buf[MEGADUCK_RX_MAX_PAYLOAD_LEN];
+extern          uint8_t megaduck_serial_rx_buf_len;
 
-void serial_io_wait_for_transfer_w_timeout_100msec(void);
+void serial_io_wait_for_transfer_with_timeout(uint8_t);
 void serial_io_send_byte(uint8_t);
 void serial_io_enable_receive_byte(void);
-void serial_external_controller_init(void);
-void serial_startup(void);
+bool megaduck_laptop_controller_init(void);
+bool megaduck_laptop_init(void);
 
 bool serial_io_send_command_and_receive_buffer(uint8_t);
-bool serial_io_wait_receive_timeout_100msec(void);
-bool serial_io_wait_receive_timeout_200msec(void);
+bool serial_io_read_byte_with_msecs_timeout(uint8_t);
 
 uint8_t serial_io_read_byte_no_timeout(void);
 

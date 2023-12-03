@@ -18,6 +18,7 @@
 #define KEY_BACKSPACE   8
 #define KEY_ENTER       13
 #define KEY_ESCAPE      27
+#define KEY_DELETE      127
 
 
 #define KEY_FLAG_KEY_REPEAT              0x01u
@@ -31,16 +32,16 @@
 
 
 // Raw key data
-extern uint8_t serial_io_packet_length;
-extern uint8_t serial_key_flags;
-extern uint8_t serial_key_code;
-extern uint8_t serial_io_checksum_calc;
+extern uint8_t megaduck_io_packet_length;
+extern uint8_t megaduck_key_flags;
+extern uint8_t megaduck_key_code;
+extern uint8_t megaduck_io_checksum_calc;
 
 
 // Post-Processed key data
-extern char    keyboard_key_pressed;
-extern char    keyboard_key_previous;
-extern uint8_t keyboard_flags;
+extern char    megaduck_key_pressed;
+extern char    megaduck_key_previous;
+extern uint8_t megaduck_key_flags;
 
 
 bool megaduck_keyboard_poll_keys(void);

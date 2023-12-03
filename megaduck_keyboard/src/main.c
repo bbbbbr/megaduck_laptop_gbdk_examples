@@ -8,7 +8,9 @@
 
 #include "megaduck_laptop_io.h"
 #include "megaduck_keyboard.h"
+#include "megaduck_model.h"
 
+bool megaduck_laptop_detected = false;
 
 uint8_t cursor_x, cursor_y;
 
@@ -47,25 +49,21 @@ static void main_init(void) {
     SHOW_BKG;
     printf("Initializing..\n");
 
-    serial_startup();
-
-    printf("Ready.\n");
-    printf("== GBDK Mega Duck ==\n");
-    update_cursor(1,0);
+    megaduck_laptop_detected = megaduck_laptop_init();
 }
 
 
 // If requested, log some data about the incoming keyboard packet
 static void log_key_data(void) {
     printf("*%hx %hx %hx %hx>%hx(%c)\n",
-        (uint8_t)serial_io_packet_length,
-        (uint8_t)serial_key_flags,
-        (uint8_t)serial_key_code,
-        (uint8_t)serial_io_checksum_calc,
+        (uint8_t)megaduck_io_packet_length,
+        (uint8_t)megaduck_key_flags,
+        (uint8_t)megaduck_key_code,
+        (uint8_t)megaduck_io_checksum_calc,
         (uint8_t)keyboard_read_ok,
-        (uint8_t)keyboard_key_pressed, (char)keyboard_key_pressed);
+        (uint8_t)megaduck_key_pressed, (char)megaduck_key_pressed);
 
-    putchar(keyboard_key_pressed);
+    putchar(megaduck_key_pressed);
 }
 
 
@@ -79,7 +77,7 @@ static void update_cursor(int8_t delta_x, int8_t delta_y) {
 // Example of typing and moving a cursor around the screen with arrow keys
 static void use_keypress_data(void) {
 
-    switch (keyboard_key_pressed) {
+    switch (megaduck_key_pressed) {
 
         case NO_KEY: break;
 
@@ -109,7 +107,7 @@ static void use_keypress_data(void) {
 
         // All other keys
         default:
-            putchar(keyboard_key_pressed);
+            putchar(megaduck_key_pressed);
             update_cursor(0, 0);
             break;
     }
@@ -117,28 +115,44 @@ static void use_keypress_data(void) {
 
 
 void main(void) {
+	
+    megaduck_laptop_check_model_vram_on_startup();  // This must be called before any vram tiles are loaded
 
     main_init();
 
-    while(1) {
-        vsync();
+	if (!megaduck_laptop_detected) {
+	    printf("Laptop not Detected\n");
+	}
+	else {
+	    printf("Laptop Detected!\n");
 
-        // Poll for keys every other frame
-        // (Polling intervals below 20ms may cause keyboard lockup)
-        if (sys_time & 0x01u) {
+        if (megaduck_model == MEGADUCK_LAPTOP_SPANISH)
+			printf("Spanish model\n");
+        else if (megaduck_model == MEGADUCK_LAPTOP_GERMAN)
+            printf("German model\n");
 
-            keyboard_read_ok = megaduck_keyboard_poll_keys();
+	    update_cursor(1,1);
 
-            if (keyboard_read_ok) {
-                // Convert from keycodes to ascii and apply key repeat
-                megaduck_keyboard_process_keys();
+		while(1) {
+		    vsync();
 
-                if (logging_enabled)
-                    log_key_data();
+		    // Poll for keys every other frame
+		    // (Polling intervals below 20ms may cause keyboard lockup)
+		    if (sys_time & 0x01u) {
 
-                use_keypress_data();
-            }
-        }
-    }
+		        keyboard_read_ok = megaduck_keyboard_poll_keys();
+
+		        if (keyboard_read_ok) {
+		            // Convert from keycodes to ascii and apply key repeat
+		            megaduck_keyboard_process_keys();
+
+		            if (logging_enabled)
+		                log_key_data();
+
+		            use_keypress_data();
+		        }
+		    }
+		}
+	}
 }
 

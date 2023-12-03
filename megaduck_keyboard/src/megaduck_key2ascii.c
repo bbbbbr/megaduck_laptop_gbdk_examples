@@ -4,6 +4,7 @@
 #include "megaduck_keyboard.h"
 #include "megaduck_key2ascii.h"
 #include "megaduck_keycodes.h"
+#include "megaduck_model.h"
 
 
 
@@ -27,7 +28,7 @@ const char key_code_to_ascii_LUT_spanish_layout[] = {
     'W',        // 0x8A Shift alt: W
     'S',        // 0x8B Shift alt: S
     NO_KEY,     // 0x8C
-    '.',        // 0x8D Shift alt: · (Spanish, mid-dot) | § (German, legal section)
+    '·',        // 0x8D Shift alt: · (Spanish, mid-dot) | § (German, legal section)
     'E',        // 0x8E Shift alt: E
     'D',        // 0x8F Shift alt: D
 
@@ -61,19 +62,19 @@ const char key_code_to_ascii_LUT_spanish_layout[] = {
     'P',        // 0xAA
     'Ñ',        // 0xAB
     NO_KEY,     // 0xAC
-    '?',        // 0xAD Shift alt: ?  | German version: ß (eszett)
+    '?',        // 0xAD Shift alt: ?
     '[',        // 0xAE Shift alt: [ (Spanish, only shift mode works) | German version: Ü
     'Ü',        // 0xAF
 
     NO_KEY,     // 0xB0
     '¿',        // 0xB1 Shift alt: ¿ (Spanish) | ` (German)  ; German version: ' (single quote?)
     '*',        // 0xB2 Shift alt: * | German version: · (mid-dot)
-    'ª',        // 0xB3 Shift alt: Feminine Ordinal [A over line] (Spanish) | ^ (German)  
+    'ª',        // 0xB3 Shift alt: Feminine Ordinal [A over line] (Spanish) | ^ (German)
     NO_KEY,     // 0xB4
     NO_KEY,     // 0xB5
     NO_KEY,     // 0xB6
     NO_KEY,     // 0xB7
-    'Z',        // 0xB8
+    'Z',        // 0xB8  // German version : 'Y'
     NO_KEY,     // 0xB9
     NO_KEY,     // 0xBA
     NO_KEY,     // 0xBB
@@ -213,7 +214,7 @@ const char key_code_to_ascii_LUT_spanish_layout[] = {
     KEY_BACKSPACE, // 0xB5 SYS_KBD_CODE_BACKSPACE
     KEY_ENTER,     // 0xB6 SYS_KBD_CODE_ENTER
     NO_KEY,     // 0xB7
-    'z',        // 0xB8 SYS_KBD_CODE_Z
+    'z',        // 0xB8 SYS_KBD_CODE_Z     // German version : 'y'
     ' ',        // 0xB9 SYS_KBD_CODE_SPACE
     NO_KEY,     // 0xBA SYS_KBD_CODE_PIANO_DO_SHARP
     NO_KEY,     // 0xBB SYS_KBD_CODE_PIANO_DO
@@ -256,7 +257,7 @@ const char key_code_to_ascii_LUT_spanish_layout[] = {
     NO_KEY,     // 0xDE SYS_KBD_CODE_PRINTSCREEN_RIGHT
     NO_KEY,     // 0xDF
 
-    '127',      // 0xE0 SYS_KBD_CODE_DELETE
+    KEY_DELETE, // 0xE0 SYS_KBD_CODE_DELETE
     '-',        // 0xE1 SYS_KBD_CODE_MINUS
     NO_KEY,     // 0xE2 SYS_KBD_CODE_PIANO_FA_2_SHARP
     NO_KEY,     // 0xE3 SYS_KBD_CODE_PIANO_FA_2
@@ -294,6 +295,36 @@ const char key_code_to_ascii_LUT_spanish_layout[] = {
 
 char megaduck_keycode_to_ascii(const uint8_t key_code) {
 
-    // TODO: Alternate German Layout
-    return key_code_to_ascii_LUT_spanish_layout[key_code];
+    char ascii_char = key_code_to_ascii_LUT_spanish_layout[key_code];
+
+    // Handle alternate German keyboard layout
+    if (megaduck_model == MEGADUCK_LAPTOP_GERMAN)
+        switch (ascii_char) {
+            // Row 1
+            // case '·':  ascii_char = '§'; break;  // TODO: handling for these
+            case '\'': ascii_char = 'ß'; break;
+            // case '¿':  ascii_char = '`'; break;  // TODO: handling for these
+            // case '¡':  ascii_char = '\''; break; // TODO: handling for these
+            case '÷':  ascii_char = ':'; break;
+            // Row 2
+            case '[':  // maps to same char below
+            case '`':  ascii_char = 'Ü'; break;
+            case ']':  ascii_char = '·'; break;
+            case 'y':  ascii_char = 'z'; break;
+            case 'Y':  ascii_char = 'Z'; break;
+            // Row 3
+            // case 'ñ':  ascii_char = 'ö'; break; // TODO: handling for these
+            // case 'Ñ':  ascii_char = 'Ö'; break; // TODO: handling for these
+            // case 'ü':  ascii_char = 'ä'; break; // TODO: handling for these
+            // case 'Ü':  ascii_char = 'Ä'; break; // TODO: handling for these
+            // case 'ª':  ascii_char = '^'; break; // TODO: handling for these
+            // case 'º':  ascii_char = '#'; break; // TODO: handling for these
+            // Row 4
+            case 'z':  ascii_char = 'y'; break;
+            case 'Z':  ascii_char = 'Y'; break;
+            case '-':  ascii_char = '@'; break;
+        }
+
+    return ascii_char;
+
 }
