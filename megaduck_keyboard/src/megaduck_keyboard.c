@@ -8,9 +8,6 @@
 #include "megaduck_keycodes.h"
 
 
-uint8_t int_enable_saved;
-
-
 uint8_t megaduck_io_packet_length;
 uint8_t megaduck_key_flags;
 uint8_t megaduck_key_code;

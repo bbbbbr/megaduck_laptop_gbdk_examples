@@ -158,10 +158,9 @@ void main(void) {
 		            megaduck_keyboard_process_keys();
 
 		            use_keypress_data();
-
-		            if (logging_enabled)
-                        putchar('\n');
 		        }
+	            if (logging_enabled)
+                    putchar('\n');
 		    }
 		}
 	}
