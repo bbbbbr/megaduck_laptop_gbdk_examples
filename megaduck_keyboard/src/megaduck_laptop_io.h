@@ -11,12 +11,16 @@
 #define SYS_REPLY__BOOT_FAIL       0x01u
 #define SYS_REPLY__BOOT_UNSET      0x00u
 
-#define SYS_CMD_INIT_SEQ_REQUEST   0x00u
-#define SYS_CMD_READ_KEYS_MAYBE    0x00u
-#define SYS_CMD_KBD_START          0x00u
-#define SYS_CMD_DONE_OR_OK         0x01u
-#define SYS_CMD_ABORT_OR_FAIL      0x04u
-#define SYS_CMD_INIT_UNKNOWN_0x09  0x09u
+#define SYS_CMD_INIT_SEQ_REQUEST          0x00u   // Value sent to request the init 255..0 countdown sequence
+#define SYS_CMD_GET_KEYS                  0x00u   // Requests a multi-byte buffer with keyboard data
+#define SYS_CMD_DONE_OR_OK                0x01u
+#define SYS_CMD_DONE_OR_OK_AND_SOMETHING  0x81u
+#define SYS_CMD_ABORT_OR_FAIL             0x04u
+#define SYS_CMD_RUN_CART_IN_SLOT          0x08u
+#define SYS_CMD_INIT_UNKNOWN_0x09         0x09u   // May also be PrintScreen related
+#define SYS_CMD_RTC_SET_DATE_AND_TIME     0x0Bu   // Sets Hardware RTC Date and Time using multi-byte buffer send/TX
+#define SYS_CMD_RTC_GET_DATE_AND_TIME     0x0Cu   // Requests a multi-byte buffer with RTC data from Peripheral
+
 
 #define SYS_REPLY_READ_FAIL_MAYBE  0x00u
 #define SYS_REPLY_BOOT_OK          0x01u
@@ -53,3 +57,4 @@ uint8_t serial_io_read_byte_no_timeout(void);
 
 
 #endif // _MEGADUCK_LAPTOP_IO_H
+

@@ -52,7 +52,7 @@ uint8_t keyboard_repeat_timeout  = REPEAT_OFF;
 //
 bool megaduck_keyboard_poll_keys(void) {
 
-    if (serial_io_send_command_and_receive_buffer(SYS_CMD_KBD_START)) {
+    if (serial_io_send_command_and_receive_buffer(SYS_CMD_GET_KEYS)) {
         if (megaduck_serial_rx_buf_len == SYS_REPLY_KBD_LEN) {
             megaduck_key_flags = megaduck_serial_rx_buf[0];
             megaduck_key_code  = megaduck_serial_rx_buf[1];
@@ -69,6 +69,7 @@ void megaduck_keyboard_process_keys(void) {
 
     // Key repeat processing is optional
     if ((megaduck_key_flags & KEY_FLAG_KEY_REPEAT) && (keyboard_repeat_allowed)) {
+
         // Default to no key repeat
         megaduck_key_pressed = NO_KEY;
 

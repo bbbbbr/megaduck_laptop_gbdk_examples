@@ -37,6 +37,7 @@ static void use_keypress_data(void);
 static void main_init(void);
 
 
+
 static void main_init(void) {
 
     // Set up sprite cursor
@@ -55,15 +56,22 @@ static void main_init(void) {
 
 // If requested, log some data about the incoming keyboard packet
 static void log_key_data(void) {
-    printf("*%hx %hx %hx %hx>%hx(%c)\n",
+
+    printf("*%hx %hx %hx %hx=",
         (uint8_t)megaduck_io_packet_length,
         (uint8_t)megaduck_key_flags,
         (uint8_t)megaduck_key_code,
-        (uint8_t)megaduck_io_checksum_calc,
-        (uint8_t)keyboard_read_ok,
-        (uint8_t)megaduck_key_pressed, (char)megaduck_key_pressed);
+        (uint8_t)megaduck_io_checksum_calc);
 
-    putchar(megaduck_key_pressed);
+//    printf("*%hx %hx %hx %hx:%hx=%c\n",
+//        (uint8_t)megaduck_io_packet_length,
+//        (uint8_t)megaduck_key_flags,
+//        (uint8_t)megaduck_key_code,
+//        (uint8_t)megaduck_io_checksum_calc,
+//        (uint8_t)keyboard_read_ok,
+//        (char)megaduck_key_pressed);
+//
+//    putchar(megaduck_key_pressed);
 }
 
 
@@ -142,14 +150,17 @@ void main(void) {
 
 		        keyboard_read_ok = megaduck_keyboard_poll_keys();
 
+		            if (logging_enabled)
+		                log_key_data();
+
 		        if (keyboard_read_ok) {
 		            // Convert from keycodes to ascii and apply key repeat
 		            megaduck_keyboard_process_keys();
 
-		            if (logging_enabled)
-		                log_key_data();
-
 		            use_keypress_data();
+
+		            if (logging_enabled)
+                        putchar('\n');
 		        }
 		    }
 		}
