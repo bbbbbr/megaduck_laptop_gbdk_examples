@@ -2,10 +2,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "megaduck_laptop_io.h"
-#include "megaduck_keyboard.h"
+#include <megaduck_laptop_io.h>
+#include <megaduck_keycodes.h>
+
 #include "megaduck_key2ascii.h"
-#include "megaduck_keycodes.h"
+#include "megaduck_keyboard.h"
 
 
 uint8_t megaduck_io_packet_length;

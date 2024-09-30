@@ -2,7 +2,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "megaduck_laptop_io.h"
+#include <megaduck_laptop_io.h>
+
 #include "megaduck_rtc.h"
 
 // These BCD conversions are for simplicity, in

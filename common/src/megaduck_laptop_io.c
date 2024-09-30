@@ -5,15 +5,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "megaduck_laptop_io.h"
+#include <megaduck_laptop_io.h>
 
 volatile SFR __at(0xFF60) FF60_REG;
 
 // TODO: namespace to megaduck
 volatile bool    serial_byte_recieved;
 volatile uint8_t megaduck_serial_rx_data;
+
          uint8_t megaduck_serial_rx_buf[MEGADUCK_RX_MAX_PAYLOAD_LEN];
          uint8_t megaduck_serial_rx_buf_len;
+
+         uint8_t megaduck_serial_tx_buf[MEGADUCK_TX_MAX_PAYLOAD_LEN];
+         uint8_t megaduck_serial_tx_buf_len;
 
          uint8_t serial_cmd_0x09_reply_data; // In original hardware it's requested, but used for nothing?
 
@@ -121,6 +125,82 @@ bool serial_io_read_byte_with_msecs_timeout(uint8_t timeout_len_ms) {
 }
 
 
+// Sends a byte and waits for a reply with timeout
+// Returns:
+// - Timeout length is roughly in msec (100 is about ~ 103 msec or 6.14 frames)
+// - If timed out: false
+// - If ack/reply didn't match expected: false
+// - Otherwise true
+bool serial_io_send_byte_and_check_ack_msecs_timeout(uint8_t tx_byte, uint8_t timeout_len_ms, uint8_t expected_reply) {
+    serial_io_send_byte(tx_byte);
+
+    // Fail if first rx byte timed out
+    if (!serial_io_read_byte_with_msecs_timeout(timeout_len_ms)) return false;
+
+    // Then check reply byte vs expected reply
+    return (megaduck_serial_rx_data == expected_reply);
+}
+
+
+// Sends a command and a multi-byte buffer over Serial IO
+//
+// - Send buffer globals: megaduck_serial_tx_buf, size in: megaduck_serial_tx_buf_len
+// - Length of serial transfer: Determined by megaduck_serial_tx_buf_len
+// - Returns: true if succeeded
+//
+bool serial_io_send_command_and_buffer(uint8_t io_cmd) {
+
+    // Send buffer length + 2 (for length header and checksum bytes)
+    uint8_t packet_length = megaduck_serial_tx_buf_len + 2;
+    uint8_t checksum_calc = packet_length; // Use total tx length (byte) as initial checksum
+
+    // Save interrupt enables and then set only Serial to ON
+    uint8_t int_enables_saved = IE_REG;
+    IE_REG = SIO_IFLAG;
+
+    // Send command to initiate buffer transfer, then check for reply
+    if (!serial_io_send_byte_and_check_ack_msecs_timeout(io_cmd, TIMEOUT_200_MSEC, SYS_REPLY_SEND_BUFFER_OK)) {
+        IE_REG = int_enables_saved;
+        return false;
+    }
+
+    // Send buffer length + 2 (for length header and checksum bytes)
+    delay_1_msec;  // Delay for unknown reasons (present in system rom)
+        if (!serial_io_send_byte_and_check_ack_msecs_timeout(packet_length, TIMEOUT_200_MSEC, SYS_REPLY_SEND_BUFFER_OK)) {
+        IE_REG = int_enables_saved;
+        return false;
+    }
+
+    // Send the buffer contents
+    uint8_t buffer_bytes_to_send = megaduck_serial_tx_buf_len;
+    for (uint8_t idx = 0; idx < megaduck_serial_tx_buf_len; idx++) {
+
+        // Update checksum with next byte
+        checksum_calc += megaduck_serial_tx_buf[idx];
+
+        // Send a byte from the buffer
+        if (!serial_io_send_byte_and_check_ack_msecs_timeout(megaduck_serial_tx_buf[idx], TIMEOUT_200_MSEC, SYS_REPLY_SEND_BUFFER_OK)) {
+            IE_REG = int_enables_saved;
+            return false;
+        }
+    }
+
+    // Done sending buffer bytes, last byte to send is checksum 
+    // Tx Checksum Byte should == (((sum of all bytes except checksum) XOR 0xFF) + 1) [two's complement]
+    checksum_calc = ~checksum_calc + 1u;  // 2's complement
+    // Note different expected reply value versus previous reply checks
+    if (!serial_io_send_byte_and_check_ack_msecs_timeout(checksum_calc, TIMEOUT_200_MSEC, SYS_REPLY_BUFFER_SEND_AND_CHECKSUM_OK)) {
+        IE_REG = int_enables_saved;
+        return false;
+    }
+
+    // Success
+    IE_REG = int_enables_saved;
+    return true;
+}
+
+
+
 // Sends a command and then receives a multi-byte buffer over Serial IO
 //
 // - Receive buffer globals: megaduck_serial_rx_buf, size in: megaduck_serial_rx_buf_len
@@ -141,7 +221,7 @@ bool serial_io_send_command_and_receive_buffer(uint8_t io_cmd) {
 
     // delay_1_msec()  // Another mystery, ignore it for now
     serial_io_send_byte(io_cmd);
-    
+
     // Fail if first rx byte timed out
     if (serial_io_read_byte_with_msecs_timeout(TIMEOUT_100_MSEC)) {
 
@@ -243,7 +323,7 @@ bool megaduck_laptop_controller_init(void) {
 bool megaduck_laptop_init(void) {
     uint8_t int_enables_saved;
     bool laptop_init_is_ok = true;
-
+`
     disable_interrupts();
     int_enables_saved = IE_REG;
     SC_REG = 0x00u;

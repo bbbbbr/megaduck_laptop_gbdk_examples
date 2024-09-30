@@ -2,8 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-
-#include "megaduck_model.h"
+#include <megaduck_model.h>
 
 
 uint8_t megaduck_model = MEGADUCK_HANDHELD_STANDARD;

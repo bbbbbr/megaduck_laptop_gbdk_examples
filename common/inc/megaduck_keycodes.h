@@ -203,7 +203,7 @@
 #define MEGADUCK_KEY_PIANO_SI            0xD3u
 #define MEGADUCK_KEY_PIANO_DO_2          0xD7u
 #define MEGADUCK_KEY_PIANO_RE_2          0xDBu
-#define MEGADUCK_KEY_PIANO_MI_2          0xEFu
+#define MEGADUCK_KEY_PIANO_MI_2          0xDFu
 #define MEGADUCK_KEY_PIANO_FA_2          0xE3u
 #define MEGADUCK_KEY_PIANO_SOL_2         0xE7u
 #define MEGADUCK_KEY_PIANO_LA_2          0xEBu

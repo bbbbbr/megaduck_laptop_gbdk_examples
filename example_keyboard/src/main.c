@@ -6,9 +6,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "megaduck_laptop_io.h"
+#include <megaduck_laptop_io.h>
+#include <megaduck_model.h>
+
 #include "megaduck_keyboard.h"
-#include "megaduck_model.h"
 
 bool megaduck_laptop_detected = false;
 

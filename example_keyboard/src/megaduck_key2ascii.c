@@ -1,11 +1,12 @@
 #include <gbdk/platform.h>
 #include <stdint.h>
 
-#include "megaduck_keyboard.h"
-#include "megaduck_key2ascii.h"
-#include "megaduck_keycodes.h"
-#include "megaduck_model.h"
+#include <megaduck_model.h>
 
+#include <megaduck_keycodes.h>
+
+#include "megaduck_key2ascii.h"
+#include "megaduck_keyboard.h"
 
 
 // TODO: Not a very efficient use of space, lots of null entries

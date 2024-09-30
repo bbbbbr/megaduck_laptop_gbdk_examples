@@ -29,19 +29,26 @@ LCCFLAGS += -Wf-MMD -Wf-Wp-MP # Header file dependency output (-MMD) for Makefil
 CFLAGS += -Wf-MMD -Wf-Wp-MP # Header file dependency output (-MMD) for Makefile use + per-header Phony rules (-MP)
 
 # You can set the name of the ROM file here
-PROJECTNAME = megaduck_keyboard
+PROJECTNAME = megaduck_rtc
 
 # EXT?=gb # Only sets extension to default (game boy .gb) if not populated
 SRCDIR      = src
+COMMON_SRCDIR = ../common/src
+COMMON_INCDIR = ../common/inc
 OBJDIR      = obj/$(EXT)
 RESDIR      = res
 BINDIR      = build/$(EXT)
 MKDIRS      = $(OBJDIR) $(BINDIR) # See bottom of Makefile for directory auto-creation
 
+# Add common include dir
+CFLAGS += -I$(COMMON_INCDIR)
+
 BINS	    = $(OBJDIR)/$(PROJECTNAME).$(EXT)
 CSOURCES    = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.c))) $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/*.c)))
+CSOURCES   += $(foreach dir,$(COMMON_SRCDIR),$(notdir $(wildcard $(dir)/*.c)))
+
 ASMSOURCES  = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.s)))
-OBJS       = $(CSOURCES:%.c=$(OBJDIR)/%.o) $(ASMSOURCES:%.s=$(OBJDIR)/%.o)
+OBJS        = $(CSOURCES:%.c=$(OBJDIR)/%.o) $(ASMSOURCES:%.s=$(OBJDIR)/%.o)
 
 # Dependencies (using output from -Wf-MMD -Wf-Wp-MP)
 DEPS = $(OBJS:%.o=%.d)
@@ -50,6 +57,13 @@ DEPS = $(OBJS:%.o=%.d)
 
 # Builds all targets sequentially
 all: $(TARGETS)
+
+test:
+	echo $(CSOURCES)
+
+# Compile .c files in "src/" to .o object files
+$(OBJDIR)/%.o:	$(COMMON_SRCDIR)/%.c
+	$(LCC) $(CFLAGS) -c -o $@ $<
 
 # Compile .c files in "src/" to .o object files
 $(OBJDIR)/%.o:	$(SRCDIR)/%.c
