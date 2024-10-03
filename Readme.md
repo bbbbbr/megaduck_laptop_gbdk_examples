@@ -1,4 +1,6 @@
 # These examples are now merged into GBDK-2020
+
+The updated versions can be found at this URL:
 https://github.com/gbdk-2020/gbdk-2020/tree/develop/gbdk-lib/examples/megaduck
 
 ### Emulation for Development and Testing
